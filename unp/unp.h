@@ -44,6 +44,54 @@
 #define	DIR_MODE	(FILE_MODE | S_IXUSR | S_IXGRP | S_IXOTH)
 					/* default permissions for new directories */
 
+#define	SERV_PORT		 12345			/* TCP and UDP */
+
+typedef	void	Sigfunc(int);	/* for signal handlers */
+
+
+/*-------------------------------------------------*/
+
+
+			/* prototypes for our stdio wrapper functions: see {Sec errors} */
+void	 Fclose(FILE *);
+FILE	*Fdopen(int, const char *);
+char	*Fgets(char *, int, FILE *);
+FILE	*Fopen(const char *, const char *);
+void	 Fputs(const char *, FILE *);
+
+
+/*-------------------------------------------------*/
+
+
+
+
+/* prototypes for our own library wrapper functions */
+// void	 Connect_timeo(int, const SA *, socklen_t, int);
+// int		 Family_to_level(int);
+// struct addrinfo *Host_serv(const char *, const char *, int, int);
+const char		*Inet_ntop(int, const void *, char *, size_t);
+void			 Inet_pton(int, const char *, void *);
+// char			*If_indextoname(unsigned int, char *);
+// unsigned int		 If_nametoindex(const char *);
+// struct if_nameindex	*If_nameindex(void);
+// char   **My_addrs(int *);
+// ssize_t	 Read_fd(int, void *, size_t, int *);
+// int		 Readable_timeo(int, int);
+// ssize_t	 Recvfrom_flags(int, void *, size_t, int *, SA *, socklen_t *, struct unp_in_pktinfo *);
+// Sigfunc *Signal(int, Sigfunc *);
+// Sigfunc *Signal_intr(int, Sigfunc *);
+// int		 Sock_bind_wild(int, int);
+// char	*Sock_ntop(const SA *, socklen_t);
+// char	*Sock_ntop_host(const SA *, socklen_t);
+// int		 Sockfd_to_family(int);
+// int		 Tcp_connect(const char *, const char *);
+// int		 Tcp_listen(const char *, const char *, socklen_t *);
+// int		 Udp_client(const char *, const char *, SA **, socklen_t *);
+// int		 Udp_connect(const char *, const char *);
+// int		 Udp_server(const char *, const char *, socklen_t *);
+// ssize_t	 Write_fd(int, void *, size_t, int);
+// int		 Writable_timeo(int, int);
+
 
 /*-------------------------------------------------*/
 //wrapunix.c
