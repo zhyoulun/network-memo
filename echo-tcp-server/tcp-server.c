@@ -1,13 +1,20 @@
 #include "unp.h"
 
-void str_echo(int connfd);
-
 int main(int argc, char **argv)
 {
     int listenfd, connfd;
     pid_t childpid;
     socklen_t clilen;
     struct sockaddr_in in_cliaddr, servaddr;
+
+    int maxi, maxfd;
+    int n;
+    int i;
+    int client[FD_SETSIZE];
+    int nready;
+    fd_set rset, allset;
+
+    char buf[MAXLINE];
 
     listenfd = Socket(AF_INET, SOCK_STREAM, 0);
 
@@ -18,35 +25,76 @@ int main(int argc, char **argv)
 
     Bind(listenfd, (SA *)&servaddr, sizeof(servaddr));
     Listen(listenfd, LISTENQ);
+
+    maxfd = listenfd;
+    maxi = -1;
+    for (i = 0; i < FD_SETSIZE; i++)
+    {
+        client[i] = -1;
+    }
+    FD_ZERO(&allset);
+    FD_SET(listenfd, &allset);
+
     for (;;)
     {
-        clilen = sizeof(in_cliaddr);
-        connfd = Accept(listenfd, (SA *)&in_cliaddr, &clilen);
-        if ((childpid = Fork()) == 0)
+        rset = allset;
+        nready = Select(maxfd + 1, &rset, NULL, NULL, NULL);
+        if (FD_ISSET(listenfd, &rset))
         {
-            Close(listenfd);
-            str_echo(connfd);
-            exit(0);
+            clilen = sizeof(in_cliaddr);
+            connfd = Accept(listenfd, (SA *)&in_cliaddr, &clilen);
+            for (i = 0; i < FD_SETSIZE; i++)
+            {
+                if (client[i] == -1)
+                {
+                    client[i] = connfd;
+                    break;
+                }
+            }
+            if (i == FD_SETSIZE)
+            {
+                err_quit("too many clients");
+            }
+            FD_SET(connfd, &allset);
+            if (connfd > maxfd)
+            {
+                maxfd = connfd;
+            }
+            if (i > maxi)
+            {
+                maxi = i;
+            }
+            nready--;
+            if (nready <= 0)
+            {
+                continue;
+            }
         }
-        Close(connfd);
-    }
-}
 
-void str_echo(int connfd)
-{
-    ssize_t n;
-    char buf[MAXLINE];
-again:
-    while ((n = read(connfd, buf, MAXLINE)) > 0)
-    {
-        Writen(connfd, buf, n);
-    }
-    if (n < 0 && errno == EINTR)
-    {
-        goto again;
-    }
-    else if (n < 0)
-    {
-        err_sys("str_echo: read error");
+        for (i = 0; i < FD_SETSIZE; i++)
+        {
+            if ((connfd = client[i]) < 0)
+            {
+                continue;
+            }
+            if (FD_ISSET(connfd, &rset))
+            {
+                if ((n = Read(connfd, buf, MAXLINE)) == 0)
+                {
+                    Close(connfd);
+                    FD_CLR(connfd, &allset);
+                    client[i] = -1;
+                }
+                else
+                {
+                    Writen(connfd, buf, n);
+                }
+                nready--;
+                if (nready <= 0)
+                {
+                    break;
+                }
+            }
+        }
     }
 }

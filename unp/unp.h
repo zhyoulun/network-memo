@@ -33,6 +33,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include <math.h>
+
 /*-------------------------------------------------*/
 #define	MAXLINE		4096	/* max text line length */
 #define	SA	struct sockaddr
@@ -47,6 +49,9 @@
 #define	SERV_PORT		 12345			/* TCP and UDP */
 
 typedef	void	Sigfunc(int);	/* for signal handlers */
+
+#define	min(a,b)	((a) < (b) ? (a) : (b))
+#define	max(a,b)	((a) > (b) ? (a) : (b))
 
 
 /*-------------------------------------------------*/
@@ -78,7 +83,7 @@ void			 Inet_pton(int, const char *, void *);
 // ssize_t	 Read_fd(int, void *, size_t, int *);
 // int		 Readable_timeo(int, int);
 // ssize_t	 Recvfrom_flags(int, void *, size_t, int *, SA *, socklen_t *, struct unp_in_pktinfo *);
-// Sigfunc *Signal(int, Sigfunc *);
+Sigfunc *Signal(int, Sigfunc *);
 // Sigfunc *Signal_intr(int, Sigfunc *);
 // int		 Sock_bind_wild(int, int);
 // char	*Sock_ntop(const SA *, socklen_t);
